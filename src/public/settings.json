@@ -1,0 +1,33 @@
+{
+  "greeting": "StackLinks",
+  "logo": "",
+  "logoAlt": "",
+  "features": {
+    "darkMode": true,
+    "importExport": true,
+    "weather": true,
+    "iconStyleSwitch": true
+  },
+  "showDate": true,
+  "showTime": true,
+  "dateFormat": "DD/MM/YYYY",
+  "timeFormat": "HH:mm:ss",
+  "linksPerRow": 6,
+  "showLinkNames": true,
+  "defaultColor": "#4f46e5",
+  "gridColumns": 3,
+  "colors": {
+    "light": {
+      "bg": "#f8fafc",
+      "surface": "#ffffff",
+      "text": "#111827",
+      "accent": "#4f46e5"
+    },
+    "dark": {
+      "bg": "#111827",
+      "surface": "#1f2937",
+      "text": "#f3f4f6",
+      "accent": "#6366f1"
+    }
+  }
+}

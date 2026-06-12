@@ -1,0 +1,11 @@
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    ports:
+      - "5174:5173"
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    command: sh -c "npm install && npm run dev -- --host"

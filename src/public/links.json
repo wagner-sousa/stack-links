@@ -1,0 +1,81 @@
+{
+  "company": {
+    "name": "My Company",
+    "logo": "",
+    "logoAlt": "Company Logo"
+  },
+  "sections": [
+    {
+      "id": "general",
+      "name": "General",
+      "color": "#4f46e5",
+      "fixed": true,
+      "links": [
+        { "name": "Gmail", "url": "https://mail.google.com", "icon": "gmail" },
+        { "name": "Slack", "url": "https://slack.com", "icon": "slack" },
+        { "name": "Google Drive", "url": "https://drive.google.com", "icon": "googledrive" },
+        { "name": "Google Meet", "url": "https://meet.google.com", "icon": "googlemeet" },
+        { "name": "Notion", "url": "https://notion.so", "icon": "notion" }
+      ]
+    },
+    {
+      "id": "engineering",
+      "name": "Engineering",
+      "color": "#059669",
+      "fixed": true,
+      "links": [
+        { "name": "GitHub", "url": "https://github.com", "icon": "github" },
+        { "name": "GitLab", "url": "https://gitlab.com", "icon": "gitlab" },
+        { "name": "Docker Hub", "url": "https://hub.docker.com", "icon": "docker" },
+        { "name": "AWS Console", "url": "https://aws.amazon.com/console", "icon": "amazonwebservices" },
+        { "name": "Vercel", "url": "https://vercel.com", "icon": "vercel" },
+        { "name": "Cloudflare", "url": "https://dash.cloudflare.com", "icon": "cloudflare" }
+      ]
+    },
+    {
+      "id": "hr",
+      "name": "HR",
+      "color": "#d97706",
+      "fixed": true,
+      "links": [
+        { "name": "HR Portal", "url": "https://hr.company.com", "icon": "maildotru" },
+        { "name": "Benefits", "url": "https://benefits.company.com", "icon": "heart" },
+        { "name": "Time Clock", "url": "https://time.company.com", "icon": "clock" }
+      ]
+    },
+    {
+      "id": "finance",
+      "name": "Finance",
+      "color": "#dc2626",
+      "fixed": true,
+      "links": [
+        { "name": "SAP", "url": "https://sap.company.com", "icon": "sap" },
+        { "name": "Expenses", "url": "https://expenses.company.com", "icon": "currency" }
+      ]
+    },
+    {
+      "id": "design",
+      "name": "Design",
+      "color": "#8b5cf6",
+      "fixed": true,
+      "links": [
+        { "name": "Figma", "url": "https://figma.com", "icon": "figma" },
+        { "name": "Penpot", "url": "https://penpot.app", "icon": "penpot" },
+        { "name": "Dribbble", "url": "https://dribbble.com", "icon": "dribbble" },
+        { "name": "Unsplash", "url": "https://unsplash.com", "icon": "unsplash" }
+      ]
+    },
+    {
+      "id": "communication",
+      "name": "Communication",
+      "color": "#0ea5e9",
+      "fixed": true,
+      "links": [
+        { "name": "Slack", "url": "https://slack.com", "icon": "slack" },
+        { "name": "Teams", "url": "https://teams.microsoft.com", "icon": "microsoftteams" },
+        { "name": "Discord", "url": "https://discord.com", "icon": "discord" },
+        { "name": "Zoom", "url": "https://zoom.us", "icon": "zoom" }
+      ]
+    }
+  ]
+}

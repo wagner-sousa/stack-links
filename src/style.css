@@ -1,0 +1,200 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-text: #111827;
+  --color-accent: #4f46e5;
+}
+.dark {
+  --color-bg: #111827;
+  --color-surface: #1f2937;
+  --color-text: #f3f4f6;
+  --color-accent: #6366f1;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.section-card {
+  transition: all 0.2s;
+}
+.section-card:hover {
+  transform: translateY(-0.2rem);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15);
+}
+.dark .section-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+}
+
+.link-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background-color: var(--color-surface);
+  border: 1px solid color-mix(in srgb, var(--color-text) 15%, transparent);
+  transition: all 0.15s;
+}
+.link-card:hover {
+  @apply shadow-md;
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--color-text) 60%, transparent);
+  transition: all 0.15s;
+  cursor: pointer;
+}
+.btn-ghost:hover {
+  background-color: color-mix(in srgb, var(--color-text) 10%, transparent);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background-color: var(--color-accent);
+  color: #ffffff;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+.btn-primary:hover {
+  background-color: color-mix(in srgb, var(--color-accent) 80%, black);
+}
+
+.input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.875rem;
+  outline: none;
+}
+.input:focus {
+  box-shadow: 0 0 0 2px var(--color-accent);
+  border-color: transparent;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.icon-svg svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+[x-cloak] { display: none !important; }
+
+.grid-auto {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(1, 1fr);
+}
+@media (min-width: 768px) {
+  .grid-auto {
+    grid-template-columns: repeat(var(--grid-cols, 3), 1fr);
+  }
+}
+
+/* ---- Tabs ---- */
+.tab {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--color-text) 50%, transparent);
+  transition: all 0.15s;
+  cursor: pointer;
+}
+.tab:hover {
+  background-color: color-mix(in srgb, var(--color-text) 10%, transparent);
+  color: var(--color-text);
+}
+.tab-active {
+  @apply px-4 py-2 rounded-lg text-sm font-medium text-white transition-all duration-150 cursor-pointer;
+}
+
+/* ---- Links grid ---- */
+.links-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--links-per-row, 6), 1fr);
+  gap: 0.75rem;
+}
+.link-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background-color: var(--color-surface);
+  border: 1px solid color-mix(in srgb, var(--color-text) 15%, transparent);
+  color: var(--color-text);
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.link-tile:hover {
+  @apply shadow-md;
+  transform: translateY(-2px);
+}
+.link-tile img, .link-tile .icon-svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.link-tile[draggable="true"] {
+  cursor: grab;
+}
+.link-tile[draggable="true"]:active {
+  cursor: grabbing;
+}
+.sortable-ghost {
+  opacity: 0.4;
+  border: 2px dashed #6366f1;
+  background: rgba(99, 102, 241, 0.08);
+}
+.sortable-dragging {
+  opacity: 0.8;
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+[data-lucide] {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: middle;
+}

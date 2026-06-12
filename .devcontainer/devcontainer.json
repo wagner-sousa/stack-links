@@ -1,0 +1,17 @@
+{
+  "name": "StackLinks",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "forwardPorts": [5173],
+  "postCreateCommand": "npm install",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint"
+      ]
+    }
+  }
+}

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔗</text></svg>">
+  <title x-text="settings.greeting || company.name || 'StackLinks'"></title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div x-data="app" class="min-h-screen relative">
+    <!-- Floating controls -->
+    <div class="flex items-center justify-center gap-1 pt-6 pb-2">
+      <button x-show="settings.features?.iconStyleSwitch !== false" @click="cycleIconStyle" class="btn-ghost px-2" :title="'Icons: ' + iconStyle">
+        <i data-lucide="palette" class="w-4 h-4" x-show="iconStyle === 'official'"></i>
+        <i data-lucide="layers" class="w-4 h-4" x-show="iconStyle === 'section'"></i>
+        <i data-lucide="monitor" class="w-4 h-4" x-show="iconStyle === 'dynamic'"></i>
+      </button>
+      <button x-show="settings.features?.importExport !== false" @click="exportData" class="btn-ghost px-2" title="Export">
+        <i data-lucide="download" class="w-4 h-4"></i>
+      </button>
+      <label x-show="settings.features?.importExport !== false" class="btn-ghost px-2 cursor-pointer" title="Import">
+        <i data-lucide="upload" class="w-4 h-4"></i>
+        <input type="file" accept=".json" @change="importData" class="hidden">
+      </label>
+      <button x-show="settings.features?.darkMode !== false" @click="toggleTheme" class="btn-ghost px-2" title="Toggle theme">
+        <i data-lucide="sun" class="w-5 h-5" x-show="theme === 'dark'"></i>
+        <i data-lucide="moon" class="w-5 h-5" x-show="theme !== 'dark'"></i>
+      </button>
+    </div>
+
+    <main class="max-w-6xl mx-auto px-4 py-12">
+      <!-- Top block: time + date + weather (Bento-like) -->
+      <div class="flex items-center justify-center gap-16 mb-8 flex-wrap">
+        <div class="text-center" x-show="settings.showTime !== false">
+          <div class="text-7xl font-bold tabular-nums tracking-tight" x-text="timeStr"></div>
+          <p x-show="settings.greeting" class="text-xl text-gray-500 dark:text-gray-400 mt-2" x-text="settings.greeting"></p>
+        </div>
+        <div class="text-center">
+          <div x-show="settings.showDate !== false" class="text-4xl font-bold tabular-nums" x-text="dateStr"></div>
+          <template x-if="settings.features?.weather && temperature !== null">
+            <div class="flex items-center justify-center gap-3 mt-3 text-gray-500 dark:text-gray-400">
+              <i data-lucide="sun" x-bind:data-lucide="weatherLucide" class="w-8 h-8"></i>
+              <span class="text-2xl font-semibold" x-text="`${temperature}°`"></span>
+              <span x-show="city" class="text-sm" x-text="city"></span>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Tab bar -->
+      <div class="flex items-center justify-center gap-2 mb-8 flex-wrap">
+        <template x-for="section in sections" :key="section.id">
+          <button @click="selectTab(section.id)"
+                  class="tab"
+                  :class="{ 'tab-active': activeTab === section.id }"
+                  :style="activeTab === section.id ? { backgroundColor: section.color } : {}">
+            <span x-text="section.name"></span>
+          </button>
+        </template>
+        <button @click="openAddSectionModal" class="tab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" title="Add section">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Tab content -->
+      <template x-for="section in sections" :key="section.id">
+        <div x-show="activeTab === section.id" x-transition:enter="fade-in">
+          <!-- Section header controls -->
+          <div class="flex items-center justify-between mb-4">
+            <p x-show="section.description" class="text-sm text-gray-400" x-text="section.description"></p>
+            <div class="flex items-center gap-1 ml-auto">
+              <button x-show="!section.fixed" @click="openEditSectionModal(section)" class="btn-ghost p-1" title="Edit section">
+                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+              </button>
+              <button x-show="!section.fixed" @click="deleteSection(section.id)" class="btn-ghost p-1" title="Delete section">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Links grid -->
+          <div class="links-grid" :style="{ '--links-per-row': settings.linksPerRow || 6 }">
+            <!-- Add link tile -->
+            <button @click="openAddLinkModal(section.id)"
+                    class="link-tile border-dashed text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-400">
+              <i data-lucide="plus" class="w-6 h-6"></i>
+              <span class="text-xs font-medium">Add link</span>
+            </button>
+            <template x-for="link in section.links" :key="link.id || link.url">
+              <a :href="link.url" target="_blank" rel="noopener noreferrer"
+                 class="link-tile group relative"
+                 :data-link-id="link.id || ''"
+                 :draggable="isCustomLink(link) ? true : null"
+                 :title="link.description ? link.name + ': ' + link.description : link.name">
+                <!-- Icon -->
+                <template x-if="iconStyle === 'dynamic' && link.icon && brandDynamicSvg[link.icon]">
+                  <div x-html="brandDynamicSvg[link.icon]" class="icon-svg"></div>
+                </template>
+                <template x-if="iconStyle !== 'dynamic' && link.icon">
+                  <img :src="brandIconUrl(link.icon, section.color)" alt="" loading="lazy" @error="if (link) $el.src = faviconUrl(link)">
+                </template>
+                <template x-if="!link.icon || (iconStyle === 'dynamic' && !brandDynamicSvg[link.icon])">
+                  <img :src="faviconUrl(link)" alt="" loading="lazy">
+                </template>
+                <!-- Name -->
+                <span x-show="settings.showLinkNames !== false" class="text-xs font-medium text-center leading-tight" x-text="link.name"></span>
+                <!-- Actions overlay -->
+                <div x-show="isCustomLink(link)" class="absolute top-1 right-1 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button @click.prevent="openEditLinkModal(link, section.id)" class="btn-ghost p-0.5" title="Edit">
+                    <i data-lucide="pencil" class="w-3 h-3"></i>
+                  </button>
+                  <button @click.prevent="deleteLink(link.id, section.id)" class="btn-ghost p-0.5" title="Delete">
+                    <i data-lucide="trash-2" class="w-3 h-3"></i>
+                  </button>
+                </div>
+              </a>
+            </template>
+
+          </div>
+        </div>
+      </template>
+
+    </main>
+
+    <!-- Section modal -->
+    <template x-teleport="body">
+      <div x-show="sectionModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" x-cloak>
+        <div class="absolute inset-0 bg-black/50" @click="closeSectionModal"></div>
+        <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-md mx-4 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100" x-text="sectionModalMode === 'add' ? 'Add Section' : 'Edit Section'"></h2>
+            <button @click="closeSectionModal" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+              <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
+            </button>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+              <input type="text" x-model="sectionModalName" class="input text-sm" @keydown.enter="saveSectionModal" placeholder="Section name">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description (optional)</label>
+              <input type="text" x-model="sectionModalDescription" class="input text-sm" @keydown.enter="saveSectionModal" placeholder="Section description">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
+              <input type="color" x-model="sectionModalColor" class="w-10 h-10 rounded cursor-pointer border-0">
+            </div>
+          </div>
+          <div class="flex items-center justify-end gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <button @click="closeSectionModal" class="btn-ghost px-4 py-2 text-sm">Cancel</button>
+            <button @click="saveSectionModal" class="btn-primary px-4 py-2 text-sm" x-text="sectionModalMode === 'add' ? 'Add' : 'Save'"></button>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Link modal -->
+    <template x-teleport="body">
+      <div x-show="linkModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" x-cloak>
+        <div class="absolute inset-0 bg-black/50" @click="closeLinkModal"></div>
+        <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100" x-text="linkModalMode === 'add' ? 'Add Link' : 'Edit Link'"></h2>
+            <button @click="closeLinkModal" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+              <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
+            </button>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+              <input type="text" x-model="linkModalName" class="input text-sm" @keydown.enter="saveLinkModal" placeholder="Link name">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL</label>
+              <input type="text" x-model="linkModalUrl" class="input text-sm" @keydown.enter="saveLinkModal" @input.debounce="detectIconFromUrl" placeholder="https://...">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Icon</label>
+              <div class="relative">
+                <input type="text" x-model="iconSearch" class="input text-sm pl-9" @input="linkModalIcon = iconSearch.trim()" placeholder="Search icons...">
+                <template x-if="linkModalIcon">
+                  <img :src="'https://cdn.simpleicons.org/' + linkModalIcon" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-5 h-5" alt="">
+                </template>
+              </div>
+              <div class="mt-2 max-h-40 overflow-y-auto flex flex-wrap gap-1.5 p-2 rounded-lg border border-gray-200 dark:border-gray-700">
+                <template x-for="icon in filteredPopularIcons()" :key="icon.slug">
+                  <button @click="selectIcon(icon.slug)"
+                          class="w-8 h-8 rounded-lg flex items-center justify-center p-1 border transition-all duration-100"
+                          :class="linkModalIcon === icon.slug ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 ring-2 ring-indigo-400' : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'"
+                          :title="icon.name">
+                    <img :src="'https://cdn.simpleicons.org/' + icon.slug" class="w-5 h-5" alt="" loading="lazy">
+                  </button>
+                </template>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description (optional)</label>
+              <input type="text" x-model="linkModalDescription" class="input text-sm" @keydown.enter="saveLinkModal" placeholder="Short description">
+            </div>
+          </div>
+          <div class="flex items-center justify-end gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <button @click="closeLinkModal" class="btn-ghost px-4 py-2 text-sm">Cancel</button>
+            <button @click="saveLinkModal" class="btn-primary px-4 py-2 text-sm" x-text="linkModalMode === 'add' ? 'Add' : 'Save'"></button>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Debug modal -->
+    <template x-teleport="body">
+      <div x-show="showDebug" class="fixed inset-0 z-[100] flex items-center justify-center" x-cloak>
+        <div class="absolute inset-0 bg-black/50" @click="closeDebug"></div>
+        <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">Debug Settings</h2>
+            <button @click="closeDebug" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+              <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
+            </button>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Greeting</label>
+              <input type="text" x-model="editDraft.greeting" class="input text-sm">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Logo URL</label>
+              <input type="text" x-model="editDraft.logo" class="input text-sm" placeholder="https://...">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Logo Alt</label>
+              <input type="text" x-model="editDraft.logoAlt" class="input text-sm">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Default Color</label>
+              <input type="color" x-model="editDraft.defaultColor" class="w-10 h-10 rounded cursor-pointer border-0">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date Format</label>
+              <input type="text" x-model="editDraft.dateFormat" class="input text-sm font-mono" placeholder="DD/MM/YYYY">
+              <p class="text-xs text-gray-400 mt-1">Tokens: DD MM YYYY</p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Format</label>
+              <input type="text" x-model="editDraft.timeFormat" class="input text-sm font-mono" placeholder="HH:mm:ss">
+              <p class="text-xs text-gray-400 mt-1">Tokens: HH mm ss</p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Columns per row</label>
+              <input type="number" x-model="editDraft.gridColumns" min="1" max="6" class="input text-sm w-20">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Links per row</label>
+              <input type="number" x-model="editDraft.linksPerRow" min="2" max="12" class="input text-sm w-20">
+            </div>
+
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+              <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">Theme Colors</h3>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                  <p class="text-xs font-medium text-gray-500 uppercase">Light</p>
+                  <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                    Background <input type="color" x-model="editDraft.colors.light.bg" class="w-8 h-8 rounded cursor-pointer border-0">
+                  </label>
+                  <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                    Surface <input type="color" x-model="editDraft.colors.light.surface" class="w-8 h-8 rounded cursor-pointer border-0">
+                  </label>
+                  <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                    Text <input type="color" x-model="editDraft.colors.light.text" class="w-8 h-8 rounded cursor-pointer border-0">
+                  </label>
+                  <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                    Accent <input type="color" x-model="editDraft.colors.light.accent" class="w-8 h-8 rounded cursor-pointer border-0">
+                  </label>
+                </div>
+                <div class="space-y-2">
+                  <p class="text-xs font-medium text-gray-500 uppercase">Dark</p>
+                  <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                    Background <input type="color" x-model="editDraft.colors.dark.bg" class="w-8 h-8 rounded cursor-pointer border-0">
+                  </label>
+                  <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                    Surface <input type="color" x-model="editDraft.colors.dark.surface" class="w-8 h-8 rounded cursor-pointer border-0">
+                  </label>
+                  <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                    Text <input type="color" x-model="editDraft.colors.dark.text" class="w-8 h-8 rounded cursor-pointer border-0">
+                  </label>
+                  <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                    Accent <input type="color" x-model="editDraft.colors.dark.accent" class="w-8 h-8 rounded cursor-pointer border-0">
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+              <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">Features</h3>
+              <div class="space-y-3">
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" x-model="editDraft.features.darkMode" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                  <span class="text-sm text-gray-700 dark:text-gray-300">Dark Mode</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" x-model="editDraft.features.importExport" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                  <span class="text-sm text-gray-700 dark:text-gray-300">Import / Export</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" x-model="editDraft.showDate" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                  <span class="text-sm text-gray-700 dark:text-gray-300">Show Date</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" x-model="editDraft.showTime" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                  <span class="text-sm text-gray-700 dark:text-gray-300">Show Time</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" x-model="editDraft.showLinkNames" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                  <span class="text-sm text-gray-700 dark:text-gray-300">Show Link Names</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" x-model="editDraft.features.weather" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                  <span class="text-sm text-gray-700 dark:text-gray-300">Weather Widget</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" x-model="editDraft.features.iconStyleSwitch" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                  <span class="text-sm text-gray-700 dark:text-gray-300">Icon Style Switch</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <button @click="resetDebug" class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Reset defaults</button>
+            <div class="flex items-center gap-2">
+              <button @click="closeDebug" class="btn-ghost px-4 py-2 text-sm">Cancel</button>
+              <button @click="saveDebug" class="btn-primary px-4 py-2 text-sm">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

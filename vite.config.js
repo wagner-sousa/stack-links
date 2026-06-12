@@ -9,7 +9,7 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       workbox: {
-        globPatterns: ["**/*.{js,css,html,json,svg}"],
+        globPatterns: ["**/*.{js,css,html,svg}"],
       },
       manifest: {
         name: "StackLinks",

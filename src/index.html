@@ -128,224 +128,230 @@
 
     <!-- Section modal -->
     <template x-teleport="body">
-      <div x-show="sectionModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" x-cloak>
-        <div class="absolute inset-0 bg-black/50" @click="closeSectionModal"></div>
-        <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-md mx-4 p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100" x-text="sectionModalMode === 'add' ? 'Add Section' : 'Edit Section'"></h2>
-            <button @click="closeSectionModal" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-              <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
-            </button>
-          </div>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
-              <input type="text" x-model="sectionModalName" class="input text-sm" @keydown.enter="saveSectionModal" placeholder="Section name">
+      <template x-if="sectionModalOpen">
+        <div class="fixed inset-0 z-[100] flex items-center justify-center">
+          <div class="absolute inset-0 bg-black/50" @click="closeSectionModal"></div>
+          <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-md mx-4 p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100" x-text="sectionModalMode === 'add' ? 'Add Section' : 'Edit Section'"></h2>
+              <button @click="closeSectionModal" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
+              </button>
             </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description (optional)</label>
-              <input type="text" x-model="sectionModalDescription" class="input text-sm" @keydown.enter="saveSectionModal" placeholder="Section description">
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                <input type="text" x-model="sectionModalName" class="input text-sm" @keydown.enter="saveSectionModal" placeholder="Section name">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description (optional)</label>
+                <input type="text" x-model="sectionModalDescription" class="input text-sm" @keydown.enter="saveSectionModal" placeholder="Section description">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
+                <input type="color" x-model="sectionModalColor" class="w-10 h-10 rounded cursor-pointer border-0">
+              </div>
             </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
-              <input type="color" x-model="sectionModalColor" class="w-10 h-10 rounded cursor-pointer border-0">
+            <div class="flex items-center justify-end gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <button @click="closeSectionModal" class="btn-ghost px-4 py-2 text-sm">Cancel</button>
+              <button @click="saveSectionModal" class="btn-primary px-4 py-2 text-sm" x-text="sectionModalMode === 'add' ? 'Add' : 'Save'"></button>
             </div>
-          </div>
-          <div class="flex items-center justify-end gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <button @click="closeSectionModal" class="btn-ghost px-4 py-2 text-sm">Cancel</button>
-            <button @click="saveSectionModal" class="btn-primary px-4 py-2 text-sm" x-text="sectionModalMode === 'add' ? 'Add' : 'Save'"></button>
           </div>
         </div>
-      </div>
+      </template>
     </template>
 
     <!-- Link modal -->
     <template x-teleport="body">
-      <div x-show="linkModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" x-cloak>
-        <div class="absolute inset-0 bg-black/50" @click="closeLinkModal"></div>
-        <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100" x-text="linkModalMode === 'add' ? 'Add Link' : 'Edit Link'"></h2>
-            <button @click="closeLinkModal" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-              <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
-            </button>
-          </div>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
-              <input type="text" x-model="linkModalName" class="input text-sm" @keydown.enter="saveLinkModal" placeholder="Link name">
+      <template x-if="linkModalOpen">
+        <div class="fixed inset-0 z-[100] flex items-center justify-center">
+          <div class="absolute inset-0 bg-black/50" @click="closeLinkModal"></div>
+          <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100" x-text="linkModalMode === 'add' ? 'Add Link' : 'Edit Link'"></h2>
+              <button @click="closeLinkModal" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
+              </button>
             </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL</label>
-              <input type="text" x-model="linkModalUrl" class="input text-sm" @keydown.enter="saveLinkModal" @input.debounce="detectIconFromUrl" placeholder="https://...">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Icon</label>
-              <div class="relative">
-                <input type="text" x-model="iconSearch" class="input text-sm pl-9" @input="linkModalIcon = iconSearch.trim()" placeholder="Search icons...">
-                <template x-if="linkModalIcon">
-                  <img :src="'https://cdn.simpleicons.org/' + linkModalIcon" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-5 h-5" alt="">
-                </template>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                <input type="text" x-model="linkModalName" class="input text-sm" @keydown.enter="saveLinkModal" placeholder="Link name">
               </div>
-              <div class="mt-2 max-h-40 overflow-y-auto flex flex-wrap gap-1.5 p-2 rounded-lg border border-gray-200 dark:border-gray-700">
-                <template x-for="icon in filteredPopularIcons()" :key="icon.slug">
-                  <button @click="selectIcon(icon.slug)"
-                          class="w-8 h-8 rounded-lg flex items-center justify-center p-1 border transition-all duration-100"
-                          :class="linkModalIcon === icon.slug ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 ring-2 ring-indigo-400' : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'"
-                          :title="icon.name">
-                    <img :src="'https://cdn.simpleicons.org/' + icon.slug" class="w-5 h-5" alt="" loading="lazy">
-                  </button>
-                </template>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL</label>
+                <input type="text" x-model="linkModalUrl" class="input text-sm" @keydown.enter="saveLinkModal" @input.debounce="detectIconFromUrl" placeholder="https://...">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Icon</label>
+                <div class="relative">
+                  <input type="text" x-model="iconSearch" class="input text-sm pl-9" @input="linkModalIcon = iconSearch.trim()" placeholder="Search icons...">
+                  <template x-if="linkModalIcon">
+                    <img :src="'https://cdn.simpleicons.org/' + linkModalIcon" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-5 h-5" alt="">
+                  </template>
+                </div>
+                <div class="mt-2 max-h-40 overflow-y-auto flex flex-wrap gap-1.5 p-2 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <template x-for="icon in filteredPopularIcons()" :key="icon.slug">
+                    <button @click="selectIcon(icon.slug)"
+                            class="w-8 h-8 rounded-lg flex items-center justify-center p-1 border transition-all duration-100"
+                            :class="linkModalIcon === icon.slug ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 ring-2 ring-indigo-400' : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'"
+                            :title="icon.name">
+                      <img :src="'https://cdn.simpleicons.org/' + icon.slug" class="w-5 h-5" alt="" loading="lazy">
+                    </button>
+                  </template>
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description (optional)</label>
+                <input type="text" x-model="linkModalDescription" class="input text-sm" @keydown.enter="saveLinkModal" placeholder="Short description">
               </div>
             </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description (optional)</label>
-              <input type="text" x-model="linkModalDescription" class="input text-sm" @keydown.enter="saveLinkModal" placeholder="Short description">
+            <div class="flex items-center justify-end gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <button @click="closeLinkModal" class="btn-ghost px-4 py-2 text-sm">Cancel</button>
+              <button @click="saveLinkModal" class="btn-primary px-4 py-2 text-sm" x-text="linkModalMode === 'add' ? 'Add' : 'Save'"></button>
             </div>
-          </div>
-          <div class="flex items-center justify-end gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <button @click="closeLinkModal" class="btn-ghost px-4 py-2 text-sm">Cancel</button>
-            <button @click="saveLinkModal" class="btn-primary px-4 py-2 text-sm" x-text="linkModalMode === 'add' ? 'Add' : 'Save'"></button>
           </div>
         </div>
-      </div>
+      </template>
     </template>
 
     <!-- Debug modal -->
     <template x-teleport="body">
-      <div x-show="showDebug" class="fixed inset-0 z-[100] flex items-center justify-center" x-cloak>
-        <div class="absolute inset-0 bg-black/50" @click="closeDebug"></div>
-        <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">Debug Settings</h2>
-            <button @click="closeDebug" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-              <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
-            </button>
-          </div>
-
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Greeting</label>
-              <input type="text" x-model="editDraft.greeting" class="input text-sm">
+      <template x-if="showDebug">
+        <div class="fixed inset-0 z-[100] flex items-center justify-center">
+          <div class="absolute inset-0 bg-black/50" @click="closeDebug"></div>
+          <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">Debug Settings</h2>
+              <button @click="closeDebug" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
+              </button>
             </div>
 
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Logo URL</label>
-              <input type="text" x-model="editDraft.logo" class="input text-sm" placeholder="https://...">
-            </div>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Greeting</label>
+                <input type="text" x-model="editDraft.greeting" class="input text-sm">
+              </div>
 
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Logo Alt</label>
-              <input type="text" x-model="editDraft.logoAlt" class="input text-sm">
-            </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Logo URL</label>
+                <input type="text" x-model="editDraft.logo" class="input text-sm" placeholder="https://...">
+              </div>
 
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Default Color</label>
-              <input type="color" x-model="editDraft.defaultColor" class="w-10 h-10 rounded cursor-pointer border-0">
-            </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Logo Alt</label>
+                <input type="text" x-model="editDraft.logoAlt" class="input text-sm">
+              </div>
 
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date Format</label>
-              <input type="text" x-model="editDraft.dateFormat" class="input text-sm font-mono" placeholder="DD/MM/YYYY">
-              <p class="text-xs text-gray-400 mt-1">Tokens: DD MM YYYY</p>
-            </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Default Color</label>
+                <input type="color" x-model="editDraft.defaultColor" class="w-10 h-10 rounded cursor-pointer border-0">
+              </div>
 
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Format</label>
-              <input type="text" x-model="editDraft.timeFormat" class="input text-sm font-mono" placeholder="HH:mm:ss">
-              <p class="text-xs text-gray-400 mt-1">Tokens: HH mm ss</p>
-            </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date Format</label>
+                <input type="text" x-model="editDraft.dateFormat" class="input text-sm font-mono" placeholder="DD/MM/YYYY">
+                <p class="text-xs text-gray-400 mt-1">Tokens: DD MM YYYY</p>
+              </div>
 
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Columns per row</label>
-              <input type="number" x-model="editDraft.gridColumns" min="1" max="6" class="input text-sm w-20">
-            </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Format</label>
+                <input type="text" x-model="editDraft.timeFormat" class="input text-sm font-mono" placeholder="HH:mm:ss">
+                <p class="text-xs text-gray-400 mt-1">Tokens: HH mm ss</p>
+              </div>
 
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Links per row</label>
-              <input type="number" x-model="editDraft.linksPerRow" min="2" max="12" class="input text-sm w-20">
-            </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Columns per row</label>
+                <input type="number" x-model="editDraft.gridColumns" min="1" max="6" class="input text-sm w-20">
+              </div>
 
-            <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-              <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">Theme Colors</h3>
-              <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-2">
-                  <p class="text-xs font-medium text-gray-500 uppercase">Light</p>
-                  <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-                    Background <input type="color" x-model="editDraft.colors.light.bg" class="w-8 h-8 rounded cursor-pointer border-0">
-                  </label>
-                  <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-                    Surface <input type="color" x-model="editDraft.colors.light.surface" class="w-8 h-8 rounded cursor-pointer border-0">
-                  </label>
-                  <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-                    Text <input type="color" x-model="editDraft.colors.light.text" class="w-8 h-8 rounded cursor-pointer border-0">
-                  </label>
-                  <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-                    Accent <input type="color" x-model="editDraft.colors.light.accent" class="w-8 h-8 rounded cursor-pointer border-0">
-                  </label>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Links per row</label>
+                <input type="number" x-model="editDraft.linksPerRow" min="2" max="12" class="input text-sm w-20">
+              </div>
+
+              <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">Theme Colors</h3>
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="space-y-2">
+                    <p class="text-xs font-medium text-gray-500 uppercase">Light</p>
+                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                      Background <input type="color" x-model="editDraft.colors.light.bg" class="w-8 h-8 rounded cursor-pointer border-0">
+                    </label>
+                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                      Surface <input type="color" x-model="editDraft.colors.light.surface" class="w-8 h-8 rounded cursor-pointer border-0">
+                    </label>
+                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                      Text <input type="color" x-model="editDraft.colors.light.text" class="w-8 h-8 rounded cursor-pointer border-0">
+                    </label>
+                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                      Accent <input type="color" x-model="editDraft.colors.light.accent" class="w-8 h-8 rounded cursor-pointer border-0">
+                    </label>
+                  </div>
+                  <div class="space-y-2">
+                    <p class="text-xs font-medium text-gray-500 uppercase">Dark</p>
+                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                      Background <input type="color" x-model="editDraft.colors.dark.bg" class="w-8 h-8 rounded cursor-pointer border-0">
+                    </label>
+                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                      Surface <input type="color" x-model="editDraft.colors.dark.surface" class="w-8 h-8 rounded cursor-pointer border-0">
+                    </label>
+                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                      Text <input type="color" x-model="editDraft.colors.dark.text" class="w-8 h-8 rounded cursor-pointer border-0">
+                    </label>
+                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                      Accent <input type="color" x-model="editDraft.colors.dark.accent" class="w-8 h-8 rounded cursor-pointer border-0">
+                    </label>
+                  </div>
                 </div>
-                <div class="space-y-2">
-                  <p class="text-xs font-medium text-gray-500 uppercase">Dark</p>
-                  <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-                    Background <input type="color" x-model="editDraft.colors.dark.bg" class="w-8 h-8 rounded cursor-pointer border-0">
+              </div>
+
+              <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">Features</h3>
+                <div class="space-y-3">
+                  <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" x-model="editDraft.features.darkMode" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Dark Mode</span>
                   </label>
-                  <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-                    Surface <input type="color" x-model="editDraft.colors.dark.surface" class="w-8 h-8 rounded cursor-pointer border-0">
+                  <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" x-model="editDraft.features.importExport" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Import / Export</span>
                   </label>
-                  <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-                    Text <input type="color" x-model="editDraft.colors.dark.text" class="w-8 h-8 rounded cursor-pointer border-0">
+                  <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" x-model="editDraft.showDate" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Show Date</span>
                   </label>
-                  <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-                    Accent <input type="color" x-model="editDraft.colors.dark.accent" class="w-8 h-8 rounded cursor-pointer border-0">
+                  <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" x-model="editDraft.showTime" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Show Time</span>
+                  </label>
+                  <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" x-model="editDraft.showLinkNames" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Show Link Names</span>
+                  </label>
+                  <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" x-model="editDraft.features.weather" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Weather Widget</span>
+                  </label>
+                  <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" x-model="editDraft.features.iconStyleSwitch" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Icon Style Switch</span>
                   </label>
                 </div>
               </div>
             </div>
 
-            <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-              <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">Features</h3>
-              <div class="space-y-3">
-                <label class="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" x-model="editDraft.features.darkMode" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                  <span class="text-sm text-gray-700 dark:text-gray-300">Dark Mode</span>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" x-model="editDraft.features.importExport" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                  <span class="text-sm text-gray-700 dark:text-gray-300">Import / Export</span>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" x-model="editDraft.showDate" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                  <span class="text-sm text-gray-700 dark:text-gray-300">Show Date</span>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" x-model="editDraft.showTime" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                  <span class="text-sm text-gray-700 dark:text-gray-300">Show Time</span>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" x-model="editDraft.showLinkNames" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                  <span class="text-sm text-gray-700 dark:text-gray-300">Show Link Names</span>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" x-model="editDraft.features.weather" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                  <span class="text-sm text-gray-700 dark:text-gray-300">Weather Widget</span>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" x-model="editDraft.features.iconStyleSwitch" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                  <span class="text-sm text-gray-700 dark:text-gray-300">Icon Style Switch</span>
-                </label>
+            <div class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <button @click="resetDebug" class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Reset defaults</button>
+              <div class="flex items-center gap-2">
+                <button @click="closeDebug" class="btn-ghost px-4 py-2 text-sm">Cancel</button>
+                <button @click="saveDebug" class="btn-primary px-4 py-2 text-sm">Save</button>
               </div>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <button @click="resetDebug" class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Reset defaults</button>
-            <div class="flex items-center gap-2">
-              <button @click="closeDebug" class="btn-ghost px-4 py-2 text-sm">Cancel</button>
-              <button @click="saveDebug" class="btn-primary px-4 py-2 text-sm">Save</button>
             </div>
           </div>
         </div>
-      </div>
+      </template>
     </template>
   </div>
 

@@ -51,8 +51,9 @@ document.addEventListener("alpine:init", () => {
     iconSearch: "",
     popularIcons,
 
-    // Debug modal
-    showDebug: false,
+    // Debug mode
+    debugMode: true,
+    showDebugSettings: false,
     editDraft: {},
     originalDefaults: {},
 
@@ -120,7 +121,7 @@ document.addEventListener("alpine:init", () => {
       document.addEventListener("keydown", (e) => {
         if (e.ctrlKey && e.shiftKey && e.key === "D") {
           e.preventDefault()
-          this.openDebug()
+          if (this.debugMode) this.debugMode = false
         }
       })
       document.body.addEventListener("links-reordered", (e) => {
@@ -369,39 +370,15 @@ document.addEventListener("alpine:init", () => {
 
     deleteSection(sectionId) {
       if (!confirm("Delete this section and all its links?")) return
-      this.customizations.addedSections = this.customizations.addedSections.filter(
-        (s) => s.id !== sectionId
-      )
-      delete this.customizations.editedSections[sectionId]
-      delete this.customizations.addedLinks[sectionId]
-      this.saveToStorage()
-      this.mergeData()
-      afterRender()
-    },
-
-    deleteSectionDebug(sectionId) {
-      if (!confirm("Delete this section and all its links?")) return
       const isFixed = this.fixedSections.some((s) => s.id === sectionId)
-      if (!isFixed) {
-        this.deleteSection(sectionId)
-        return
+      if (isFixed) {
+        this.customizations.hiddenSections = this.customizations.hiddenSections || []
+        this.customizations.hiddenSections.push(sectionId)
+      } else {
+        this.customizations.addedSections = this.customizations.addedSections.filter((s) => s.id !== sectionId)
+        delete this.customizations.editedSections[sectionId]
+        delete this.customizations.addedLinks[sectionId]
       }
-      this.customizations.hiddenSections = this.customizations.hiddenSections || []
-      this.customizations.hiddenSections.push(sectionId)
-      this.saveToStorage()
-      this.mergeData()
-      afterRender()
-    },
-
-    deleteLinkDebug(sectionId, link) {
-      if (!confirm("Delete this link?")) return
-      if (link.id) {
-        this.deleteLink(link.id, sectionId)
-        return
-      }
-      this.customizations.hiddenLinks = this.customizations.hiddenLinks || {}
-      this.customizations.hiddenLinks[sectionId] = this.customizations.hiddenLinks[sectionId] || []
-      this.customizations.hiddenLinks[sectionId].push(link.name + '|' + link.url)
       this.saveToStorage()
       this.mergeData()
       afterRender()
@@ -500,15 +477,20 @@ document.addEventListener("alpine:init", () => {
       afterRender()
     },
 
-    deleteLink(linkId, sectionId) {
+    deleteLink(linkId, sectionId, link) {
       if (!confirm("Delete this link?")) return
-      const links = this.customizations.addedLinks[sectionId]
-      if (!links) return
-      this.customizations.addedLinks[sectionId] = links.filter((l) => l.id !== linkId)
-      // Remove from link order
-      const order = this.customizations.linkOrder[sectionId]
-      if (order) {
-        this.customizations.linkOrder[sectionId] = order.filter((id) => id !== linkId)
+      if (linkId) {
+        const links = this.customizations.addedLinks[sectionId]
+        if (!links) return
+        this.customizations.addedLinks[sectionId] = links.filter((l) => l.id !== linkId)
+        const order = this.customizations.linkOrder[sectionId]
+        if (order) {
+          this.customizations.linkOrder[sectionId] = order.filter((id) => id !== linkId)
+        }
+      } else if (link) {
+        this.customizations.hiddenLinks = this.customizations.hiddenLinks || {}
+        this.customizations.hiddenLinks[sectionId] = this.customizations.hiddenLinks[sectionId] || []
+        this.customizations.hiddenLinks[sectionId].push(link.name + '|' + link.url)
       }
       this.saveToStorage()
       this.mergeData()
@@ -590,17 +572,22 @@ document.addEventListener("alpine:init", () => {
       reader.readAsText(file)
     },
 
-    // ---- Debug modal ----
-    openDebug() {
+    // ---- Debug mode ----
+    toggleDebugMode() {
+      this.debugMode = false
+    },
+
+    // ---- Debug settings modal ----
+    openDebugSettings() {
       this.editDraft = JSON.parse(JSON.stringify(this.settings))
-      this.showDebug = true
+      this.showDebugSettings = true
     },
 
-    closeDebug() {
-      this.showDebug = false
+    closeDebugSettings() {
+      this.showDebugSettings = false
     },
 
-    saveDebug() {
+    saveDebugSettings() {
       this.settings = JSON.parse(JSON.stringify(this.editDraft))
       const defColor = this.settings.defaultColor || "#4f46e5"
       this.sectionModalColor = defColor
@@ -608,11 +595,11 @@ document.addEventListener("alpine:init", () => {
       this.applyTheme()
       this.mergeData()
       if (this.settings.features?.weather) this.fetchWeather()
-      this.showDebug = false
+      this.showDebugSettings = false
       afterRender()
     },
 
-    resetDebug() {
+    resetDebugSettings() {
       this.editDraft = JSON.parse(JSON.stringify(this.originalDefaults))
     },
 
@@ -647,11 +634,6 @@ document.addEventListener("alpine:init", () => {
     selectIcon(slug) {
       this.linkModalIcon = slug
       this.iconSearch = slug
-    },
-
-    openAddLinkDebug() {
-      const target = this.sections.length ? this.sections[0].id : null
-      if (target) this.openAddLinkModal(target)
     },
 
     sectionsForMove(currentSectionId) {

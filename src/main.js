@@ -52,7 +52,7 @@ document.addEventListener("alpine:init", () => {
     popularIcons,
 
     // Debug mode
-    debugMode: false,
+    debugMode: true,
     showDebugSettings: false,
     editDraft: {},
     originalDefaults: {},
@@ -121,7 +121,7 @@ document.addEventListener("alpine:init", () => {
       document.addEventListener("keydown", (e) => {
         if (e.ctrlKey && e.shiftKey && e.key === "D") {
           e.preventDefault()
-          this.toggleDebugMode()
+          if (this.debugMode) this.debugMode = false
         }
       })
       document.body.addEventListener("links-reordered", (e) => {
@@ -574,7 +574,7 @@ document.addEventListener("alpine:init", () => {
 
     // ---- Debug mode ----
     toggleDebugMode() {
-      this.debugMode = !this.debugMode
+      this.debugMode = false
     },
 
     // ---- Debug settings modal ----

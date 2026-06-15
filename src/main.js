@@ -65,6 +65,10 @@ document.addEventListener("alpine:init", () => {
       const defaultSettings = await settingsRes.json()
       this.company = data.company || {}
       this.fixedSections = data.sections || []
+      if (!defaultSettings.logo && this.company.logo) {
+        defaultSettings.logo = this.company.logo
+        defaultSettings.logoAlt = this.company.logoAlt || ""
+      }
 
       const saved = localStorage.getItem("stacklinks")
       if (saved) {

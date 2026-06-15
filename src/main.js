@@ -75,7 +75,14 @@ document.addEventListener("alpine:init", () => {
       if (saved) {
         try {
           const parsed = JSON.parse(saved)
-          this.customizations = parsed.customizations || { addedSections: [], editedSections: {}, addedLinks: {}, linkOrder: {}, hiddenSections: [], hiddenLinks: {} }
+          this.customizations = {
+            addedSections: parsed.customizations?.addedSections || [],
+            editedSections: parsed.customizations?.editedSections || {},
+            addedLinks: parsed.customizations?.addedLinks || {},
+            linkOrder: parsed.customizations?.linkOrder || {},
+            hiddenSections: parsed.customizations?.hiddenSections || [],
+            hiddenLinks: parsed.customizations?.hiddenLinks || {},
+          }
           this.theme = parsed.theme || "light"
           this.iconStyle = parsed.iconStyle || "official"
           if (parsed.settings) {
@@ -478,6 +485,7 @@ document.addEventListener("alpine:init", () => {
           description: this.linkModalDescription.trim() || "",
         })
         // Append to link order
+        if (!this.customizations.linkOrder) this.customizations.linkOrder = {}
         const order = this.customizations.linkOrder[sectionId]
         if (order) order.push(id)
       } else {

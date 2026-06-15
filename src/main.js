@@ -17,7 +17,7 @@ document.addEventListener("alpine:init", () => {
     settings: {},
     fixedSections: [],
     sections: [],
-    customizations: { addedSections: [], editedSections: {}, addedLinks: {}, linkOrder: {} },
+    customizations: { addedSections: [], editedSections: {}, addedLinks: {}, linkOrder: {}, hiddenSections: [], hiddenLinks: {} },
 
     // UI state
     activeTab: null,
@@ -74,7 +74,7 @@ document.addEventListener("alpine:init", () => {
       if (saved) {
         try {
           const parsed = JSON.parse(saved)
-          this.customizations = parsed.customizations || { addedSections: [], editedSections: {}, addedLinks: {} }
+          this.customizations = parsed.customizations || { addedSections: [], editedSections: {}, addedLinks: {}, linkOrder: {}, hiddenSections: [], hiddenLinks: {} }
           this.theme = parsed.theme || "light"
           this.iconStyle = parsed.iconStyle || "official"
           if (parsed.settings) {
@@ -133,20 +133,28 @@ document.addEventListener("alpine:init", () => {
     // ---- Data merge ----
     mergeData() {
       const map = {}
+      const hiddenSections = new Set(this.customizations.hiddenSections || [])
       for (const sec of this.fixedSections) {
+        if (hiddenSections.has(sec.id)) continue
         const clone = JSON.parse(JSON.stringify(sec))
         const edits = this.customizations.editedSections[sec.id]
         if (edits) {
           if (edits.name) clone.name = edits.name
           if (edits.color) clone.color = edits.color
         }
+        const hiddenKeys = new Set(this.customizations.hiddenLinks?.[sec.id] || [])
+        if (hiddenKeys.size) {
+          clone.links = clone.links.filter(l => !hiddenKeys.has(l.id || (l.name + '|' + l.url)))
+        }
         const added = this.customizations.addedLinks[sec.id]
         if (added && added.length) {
-          clone.links.push(...JSON.parse(JSON.stringify(added)))
+          const toAdd = hiddenKeys.size ? added.filter(l => !hiddenKeys.has(l.id || (l.name + '|' + l.url))) : added
+          clone.links.push(...JSON.parse(JSON.stringify(toAdd)))
         }
         map[sec.id] = clone
       }
       for (const sec of this.customizations.addedSections) {
+        if (hiddenSections.has(sec.id)) continue
         map[sec.id] = JSON.parse(JSON.stringify(sec))
       }
       const order = this.customizations.sectionOrder
@@ -366,6 +374,34 @@ document.addEventListener("alpine:init", () => {
       )
       delete this.customizations.editedSections[sectionId]
       delete this.customizations.addedLinks[sectionId]
+      this.saveToStorage()
+      this.mergeData()
+      afterRender()
+    },
+
+    deleteSectionDebug(sectionId) {
+      if (!confirm("Delete this section and all its links?")) return
+      const isFixed = this.fixedSections.some((s) => s.id === sectionId)
+      if (!isFixed) {
+        this.deleteSection(sectionId)
+        return
+      }
+      this.customizations.hiddenSections = this.customizations.hiddenSections || []
+      this.customizations.hiddenSections.push(sectionId)
+      this.saveToStorage()
+      this.mergeData()
+      afterRender()
+    },
+
+    deleteLinkDebug(sectionId, link) {
+      if (!confirm("Delete this link?")) return
+      if (link.id) {
+        this.deleteLink(link.id, sectionId)
+        return
+      }
+      this.customizations.hiddenLinks = this.customizations.hiddenLinks || {}
+      this.customizations.hiddenLinks[sectionId] = this.customizations.hiddenLinks[sectionId] || []
+      this.customizations.hiddenLinks[sectionId].push(link.name + '|' + link.url)
       this.saveToStorage()
       this.mergeData()
       afterRender()
@@ -611,6 +647,11 @@ document.addEventListener("alpine:init", () => {
     selectIcon(slug) {
       this.linkModalIcon = slug
       this.iconSearch = slug
+    },
+
+    openAddLinkDebug() {
+      const target = this.sections.length ? this.sections[0].id : null
+      if (target) this.openAddLinkModal(target)
     },
 
     sectionsForMove(currentSectionId) {

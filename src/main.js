@@ -125,7 +125,7 @@ document.addEventListener("alpine:init", () => {
         }
       })
       document.body.addEventListener("links-reordered", (e) => {
-        this.customizations.linkOrder[this.activeTab] = e.detail.linkIds
+        this.customizations.linkOrder[this.activeTab] = e.detail.linkIds.filter(Boolean)
         this.saveToStorage()
       })
       afterRender()
@@ -186,18 +186,16 @@ document.addEventListener("alpine:init", () => {
       for (const sec of this.sections) {
         const order = this.customizations.linkOrder?.[sec.id]
         if (order && order.length) {
-          const fixed = sec.links.filter((l) => !l.id)
-          const custom = sec.links.filter((l) => l.id)
           const ordered = []
           const seen = new Set()
-          for (const id of order) {
-            const link = custom.find((l) => l.id === id)
-            if (link) { ordered.push(link); seen.add(id) }
+          for (const key of order) {
+            const link = sec.links.find((l) => this.linkKey(l) === key)
+            if (link) { ordered.push(link); seen.add(key) }
           }
-          for (const link of custom) {
-            if (!seen.has(link.id)) ordered.push(link)
+          for (const link of sec.links) {
+            if (!seen.has(this.linkKey(link))) ordered.push(link)
           }
-          sec.links = [...fixed, ...ordered]
+          sec.links = ordered
         }
       }
     },
@@ -613,6 +611,10 @@ document.addEventListener("alpine:init", () => {
     // ---- Utilities ----
     isCustomLink(link) {
       return !!link.id
+    },
+
+    linkKey(link) {
+      return link.id || (link.name + '|' + link.url)
     },
 
     selectTab(sectionId) {

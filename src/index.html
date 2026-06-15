@@ -112,8 +112,8 @@
             <template x-for="link in section.links" :key="link.id || link.url">
               <a :href="link.url" target="_blank" rel="noopener noreferrer"
                  class="link-tile group relative"
-                 :data-link-id="link.id || ''"
-                 :draggable="isCustomLink(link) ? true : null"
+                 :data-link-id="link.id || (link.name + '|' + link.url)"
+                  :draggable="debugMode || isCustomLink(link) ? true : null"
                  :title="link.description ? link.name + ': ' + link.description : link.name">
                 <!-- Icon -->
                 <template x-if="iconStyle === 'dynamic' && link.icon && brandDynamicSvg[link.icon]">

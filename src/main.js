@@ -156,7 +156,14 @@ document.addEventListener("alpine:init", () => {
       }
       for (const sec of this.customizations.addedSections) {
         if (hiddenSections.has(sec.id)) continue
-        map[sec.id] = JSON.parse(JSON.stringify(sec))
+        const clone = JSON.parse(JSON.stringify(sec))
+        const hiddenKeys = new Set(this.customizations.hiddenLinks?.[sec.id] || [])
+        const added = this.customizations.addedLinks[sec.id]
+        if (added && added.length) {
+          const toAdd = hiddenKeys.size ? added.filter(l => !hiddenKeys.has(l.id || (l.name + '|' + l.url))) : added
+          clone.links.push(...JSON.parse(JSON.stringify(toAdd)))
+        }
+        map[sec.id] = clone
       }
       const order = this.customizations.sectionOrder
       if (order && order.length) {

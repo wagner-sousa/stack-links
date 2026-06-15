@@ -75,7 +75,14 @@ document.addEventListener("alpine:init", () => {
       if (saved) {
         try {
           const parsed = JSON.parse(saved)
-          this.customizations = parsed.customizations || { addedSections: [], editedSections: {}, addedLinks: {}, linkOrder: {}, hiddenSections: [], hiddenLinks: {} }
+          this.customizations = {
+            addedSections: parsed.customizations?.addedSections || [],
+            editedSections: parsed.customizations?.editedSections || {},
+            addedLinks: parsed.customizations?.addedLinks || {},
+            linkOrder: parsed.customizations?.linkOrder || {},
+            hiddenSections: parsed.customizations?.hiddenSections || [],
+            hiddenLinks: parsed.customizations?.hiddenLinks || {},
+          }
           this.theme = parsed.theme || "light"
           this.iconStyle = parsed.iconStyle || "official"
           if (parsed.settings) {
@@ -99,6 +106,12 @@ document.addEventListener("alpine:init", () => {
               defaultSettings.colors = {
                 light: { ...defaultSettings.colors?.light, ...parsed.settings.colors?.light },
                 dark: { ...defaultSettings.colors?.dark, ...parsed.settings.colors?.dark },
+              }
+            }
+            if (parsed.settings.backgroundImage) {
+              defaultSettings.backgroundImage = {
+                light: parsed.settings.backgroundImage.light ?? defaultSettings.backgroundImage?.light ?? "",
+                dark: parsed.settings.backgroundImage.dark ?? defaultSettings.backgroundImage?.dark ?? "",
               }
             }
           }
@@ -295,12 +308,21 @@ document.addEventListener("alpine:init", () => {
       const isDark = this.theme === "dark"
       document.documentElement.classList.toggle("dark", isDark)
       const colors = this.settings.colors?.[isDark ? "dark" : "light"]
+      const root = document.documentElement
       if (colors) {
-        const root = document.documentElement
         root.style.setProperty("--color-bg", colors.bg)
         root.style.setProperty("--color-surface", colors.surface)
         root.style.setProperty("--color-text", colors.text)
         root.style.setProperty("--color-accent", colors.accent)
+      }
+      const bgImg = this.settings.backgroundImage?.[isDark ? "dark" : "light"]
+      if (bgImg) {
+        root.style.setProperty("--bg-image", `url("${bgImg}")`)
+        root.style.setProperty("--bg-overlay", isDark ? "rgba(0,0,0,0.7)" : "rgba(255,255,255,0.85)")
+        document.body.classList.add("has-bg-img")
+      } else {
+        root.style.setProperty("--bg-image", "none")
+        document.body.classList.remove("has-bg-img")
       }
     },
 
@@ -463,6 +485,7 @@ document.addEventListener("alpine:init", () => {
           description: this.linkModalDescription.trim() || "",
         })
         // Append to link order
+        if (!this.customizations.linkOrder) this.customizations.linkOrder = {}
         const order = this.customizations.linkOrder[sectionId]
         if (order) order.push(id)
       } else {
@@ -622,13 +645,21 @@ document.addEventListener("alpine:init", () => {
       this.saveToStorage()
     },
 
+    activeSectionData() {
+      return this.sections.find((s) => s.id === this.activeTab)
+    },
+
     detectIconFromUrl() {
       try {
         const host = new URL(this.linkModalUrl).hostname.replace("www.", "")
-        const guess = host.split(".")[0].toLowerCase()
-        if (this.popularIcons.some((i) => i.slug === guess)) {
-          this.linkModalIcon = guess
-          this.iconSearch = guess
+        const segments = host.split(".")
+        for (const segment of segments) {
+          const guess = segment.toLowerCase()
+          if (this.popularIcons.some((i) => i.slug === guess)) {
+            this.linkModalIcon = guess
+            this.iconSearch = guess
+            break
+          }
         }
       } catch { /* ignore */ }
     },

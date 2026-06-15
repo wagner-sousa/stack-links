@@ -17,7 +17,7 @@ document.addEventListener("alpine:init", () => {
     settings: {},
     fixedSections: [],
     sections: [],
-    customizations: { addedSections: [], editedSections: {}, addedLinks: {}, linkOrder: {} },
+    customizations: { addedSections: [], editedSections: {}, addedLinks: {}, linkOrder: {}, hiddenSections: [], hiddenLinks: {} },
 
     // UI state
     activeTab: null,
@@ -51,8 +51,9 @@ document.addEventListener("alpine:init", () => {
     iconSearch: "",
     popularIcons,
 
-    // Debug modal
-    showDebug: false,
+    // Debug mode
+    debugMode: true,
+    showDebugSettings: false,
     editDraft: {},
     originalDefaults: {},
 
@@ -74,7 +75,7 @@ document.addEventListener("alpine:init", () => {
       if (saved) {
         try {
           const parsed = JSON.parse(saved)
-          this.customizations = parsed.customizations || { addedSections: [], editedSections: {}, addedLinks: {} }
+          this.customizations = parsed.customizations || { addedSections: [], editedSections: {}, addedLinks: {}, linkOrder: {}, hiddenSections: [], hiddenLinks: {} }
           this.theme = parsed.theme || "light"
           this.iconStyle = parsed.iconStyle || "official"
           if (parsed.settings) {
@@ -100,6 +101,12 @@ document.addEventListener("alpine:init", () => {
                 dark: { ...defaultSettings.colors?.dark, ...parsed.settings.colors?.dark },
               }
             }
+            if (parsed.settings.backgroundImage) {
+              defaultSettings.backgroundImage = {
+                light: parsed.settings.backgroundImage.light ?? defaultSettings.backgroundImage?.light ?? "",
+                dark: parsed.settings.backgroundImage.dark ?? defaultSettings.backgroundImage?.dark ?? "",
+              }
+            }
           }
           if (parsed.activeTab) this.activeTab = parsed.activeTab
         } catch {
@@ -120,11 +127,11 @@ document.addEventListener("alpine:init", () => {
       document.addEventListener("keydown", (e) => {
         if (e.ctrlKey && e.shiftKey && e.key === "D") {
           e.preventDefault()
-          this.openDebug()
+          if (this.debugMode) this.debugMode = false
         }
       })
       document.body.addEventListener("links-reordered", (e) => {
-        this.customizations.linkOrder[this.activeTab] = e.detail.linkIds
+        this.customizations.linkOrder[this.activeTab] = e.detail.linkIds.filter(Boolean)
         this.saveToStorage()
       })
       afterRender()
@@ -133,21 +140,36 @@ document.addEventListener("alpine:init", () => {
     // ---- Data merge ----
     mergeData() {
       const map = {}
+      const hiddenSections = new Set(this.customizations.hiddenSections || [])
       for (const sec of this.fixedSections) {
+        if (hiddenSections.has(sec.id)) continue
         const clone = JSON.parse(JSON.stringify(sec))
         const edits = this.customizations.editedSections[sec.id]
         if (edits) {
           if (edits.name) clone.name = edits.name
           if (edits.color) clone.color = edits.color
         }
+        const hiddenKeys = new Set(this.customizations.hiddenLinks?.[sec.id] || [])
+        if (hiddenKeys.size) {
+          clone.links = clone.links.filter(l => !hiddenKeys.has(l.id || (l.name + '|' + l.url)))
+        }
         const added = this.customizations.addedLinks[sec.id]
         if (added && added.length) {
-          clone.links.push(...JSON.parse(JSON.stringify(added)))
+          const toAdd = hiddenKeys.size ? added.filter(l => !hiddenKeys.has(l.id || (l.name + '|' + l.url))) : added
+          clone.links.push(...JSON.parse(JSON.stringify(toAdd)))
         }
         map[sec.id] = clone
       }
       for (const sec of this.customizations.addedSections) {
-        map[sec.id] = JSON.parse(JSON.stringify(sec))
+        if (hiddenSections.has(sec.id)) continue
+        const clone = JSON.parse(JSON.stringify(sec))
+        const hiddenKeys = new Set(this.customizations.hiddenLinks?.[sec.id] || [])
+        const added = this.customizations.addedLinks[sec.id]
+        if (added && added.length) {
+          const toAdd = hiddenKeys.size ? added.filter(l => !hiddenKeys.has(l.id || (l.name + '|' + l.url))) : added
+          clone.links.push(...JSON.parse(JSON.stringify(toAdd)))
+        }
+        map[sec.id] = clone
       }
       const order = this.customizations.sectionOrder
       if (order && order.length) {
@@ -170,18 +192,16 @@ document.addEventListener("alpine:init", () => {
       for (const sec of this.sections) {
         const order = this.customizations.linkOrder?.[sec.id]
         if (order && order.length) {
-          const fixed = sec.links.filter((l) => !l.id)
-          const custom = sec.links.filter((l) => l.id)
           const ordered = []
           const seen = new Set()
-          for (const id of order) {
-            const link = custom.find((l) => l.id === id)
-            if (link) { ordered.push(link); seen.add(id) }
+          for (const key of order) {
+            const link = sec.links.find((l) => this.linkKey(l) === key)
+            if (link) { ordered.push(link); seen.add(key) }
           }
-          for (const link of custom) {
-            if (!seen.has(link.id)) ordered.push(link)
+          for (const link of sec.links) {
+            if (!seen.has(this.linkKey(link))) ordered.push(link)
           }
-          sec.links = [...fixed, ...ordered]
+          sec.links = ordered
         }
       }
     },
@@ -281,12 +301,21 @@ document.addEventListener("alpine:init", () => {
       const isDark = this.theme === "dark"
       document.documentElement.classList.toggle("dark", isDark)
       const colors = this.settings.colors?.[isDark ? "dark" : "light"]
+      const root = document.documentElement
       if (colors) {
-        const root = document.documentElement
         root.style.setProperty("--color-bg", colors.bg)
         root.style.setProperty("--color-surface", colors.surface)
         root.style.setProperty("--color-text", colors.text)
         root.style.setProperty("--color-accent", colors.accent)
+      }
+      const bgImg = this.settings.backgroundImage?.[isDark ? "dark" : "light"]
+      if (bgImg) {
+        root.style.setProperty("--bg-image", `url("${bgImg}")`)
+        root.style.setProperty("--bg-overlay", isDark ? "rgba(0,0,0,0.7)" : "rgba(255,255,255,0.85)")
+        document.body.classList.add("has-bg-img")
+      } else {
+        root.style.setProperty("--bg-image", "none")
+        document.body.classList.remove("has-bg-img")
       }
     },
 
@@ -361,11 +390,15 @@ document.addEventListener("alpine:init", () => {
 
     deleteSection(sectionId) {
       if (!confirm("Delete this section and all its links?")) return
-      this.customizations.addedSections = this.customizations.addedSections.filter(
-        (s) => s.id !== sectionId
-      )
-      delete this.customizations.editedSections[sectionId]
-      delete this.customizations.addedLinks[sectionId]
+      const isFixed = this.fixedSections.some((s) => s.id === sectionId)
+      if (isFixed) {
+        this.customizations.hiddenSections = this.customizations.hiddenSections || []
+        this.customizations.hiddenSections.push(sectionId)
+      } else {
+        this.customizations.addedSections = this.customizations.addedSections.filter((s) => s.id !== sectionId)
+        delete this.customizations.editedSections[sectionId]
+        delete this.customizations.addedLinks[sectionId]
+      }
       this.saveToStorage()
       this.mergeData()
       afterRender()
@@ -464,15 +497,20 @@ document.addEventListener("alpine:init", () => {
       afterRender()
     },
 
-    deleteLink(linkId, sectionId) {
+    deleteLink(linkId, sectionId, link) {
       if (!confirm("Delete this link?")) return
-      const links = this.customizations.addedLinks[sectionId]
-      if (!links) return
-      this.customizations.addedLinks[sectionId] = links.filter((l) => l.id !== linkId)
-      // Remove from link order
-      const order = this.customizations.linkOrder[sectionId]
-      if (order) {
-        this.customizations.linkOrder[sectionId] = order.filter((id) => id !== linkId)
+      if (linkId) {
+        const links = this.customizations.addedLinks[sectionId]
+        if (!links) return
+        this.customizations.addedLinks[sectionId] = links.filter((l) => l.id !== linkId)
+        const order = this.customizations.linkOrder[sectionId]
+        if (order) {
+          this.customizations.linkOrder[sectionId] = order.filter((id) => id !== linkId)
+        }
+      } else if (link) {
+        this.customizations.hiddenLinks = this.customizations.hiddenLinks || {}
+        this.customizations.hiddenLinks[sectionId] = this.customizations.hiddenLinks[sectionId] || []
+        this.customizations.hiddenLinks[sectionId].push(link.name + '|' + link.url)
       }
       this.saveToStorage()
       this.mergeData()
@@ -554,17 +592,22 @@ document.addEventListener("alpine:init", () => {
       reader.readAsText(file)
     },
 
-    // ---- Debug modal ----
-    openDebug() {
+    // ---- Debug mode ----
+    toggleDebugMode() {
+      this.debugMode = false
+    },
+
+    // ---- Debug settings modal ----
+    openDebugSettings() {
       this.editDraft = JSON.parse(JSON.stringify(this.settings))
-      this.showDebug = true
+      this.showDebugSettings = true
     },
 
-    closeDebug() {
-      this.showDebug = false
+    closeDebugSettings() {
+      this.showDebugSettings = false
     },
 
-    saveDebug() {
+    saveDebugSettings() {
       this.settings = JSON.parse(JSON.stringify(this.editDraft))
       const defColor = this.settings.defaultColor || "#4f46e5"
       this.sectionModalColor = defColor
@@ -572,17 +615,21 @@ document.addEventListener("alpine:init", () => {
       this.applyTheme()
       this.mergeData()
       if (this.settings.features?.weather) this.fetchWeather()
-      this.showDebug = false
+      this.showDebugSettings = false
       afterRender()
     },
 
-    resetDebug() {
+    resetDebugSettings() {
       this.editDraft = JSON.parse(JSON.stringify(this.originalDefaults))
     },
 
     // ---- Utilities ----
     isCustomLink(link) {
       return !!link.id
+    },
+
+    linkKey(link) {
+      return link.id || (link.name + '|' + link.url)
     },
 
     selectTab(sectionId) {

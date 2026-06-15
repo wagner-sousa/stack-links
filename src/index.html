@@ -32,6 +32,15 @@
       </button>
     </div>
 
+    <!-- Debug bar -->
+    <div x-show="debugMode" class="sticky top-0 z-50 bg-yellow-400 dark:bg-yellow-500 text-yellow-900 text-sm font-medium px-4 py-2 flex items-center justify-center gap-3">
+      <span class="uppercase tracking-wider text-xs">Debug Mode</span>
+      <button @click="openDebugSettings" class="underline hover:no-underline" title="Debug settings">
+        <i data-lucide="settings" class="w-4 h-4 inline"></i>
+      </button>
+      <button @click="toggleDebugMode" class="underline hover:no-underline">Exit</button>
+    </div>
+
     <main class="max-w-6xl mx-auto px-4 py-12">
       <!-- Logo -->
       <div x-show="settings.logo" class="flex justify-center mb-6">
@@ -62,6 +71,7 @@
                   class="tab"
                   :class="{ 'tab-active': activeTab === section.id }"
                   :style="activeTab === section.id ? { backgroundColor: section.color } : {}">
+            <i x-show="section.fixed" data-lucide="pin" class="w-3 h-3 inline mr-1 align-middle"></i>
             <span x-text="section.name"></span>
           </button>
         </template>
@@ -77,10 +87,16 @@
           <div class="flex items-center justify-between mb-4">
             <p x-show="section.description" class="text-sm text-gray-400" x-text="section.description"></p>
             <div class="flex items-center gap-1 ml-auto">
-              <button x-show="!section.fixed" @click="openEditSectionModal(section)" class="btn-ghost p-1" title="Edit section">
+              <button x-show="debugMode" @click="moveSectionUp(section.id)" class="btn-ghost p-1" title="Move section left">
+                <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+              </button>
+              <button x-show="debugMode" @click="moveSectionDown(section.id)" class="btn-ghost p-1" title="Move section right">
+                <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+              </button>
+              <button x-show="debugMode || !section.fixed" @click="openEditSectionModal(section)" class="btn-ghost p-1" title="Edit section">
                 <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
               </button>
-              <button x-show="!section.fixed" @click="deleteSection(section.id)" class="btn-ghost p-1" title="Delete section">
+              <button x-show="debugMode || !section.fixed" @click="deleteSection(section.id)" class="btn-ghost p-1" title="Delete section">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               </button>
             </div>
@@ -97,9 +113,10 @@
             <template x-for="link in section.links" :key="link.id || link.url">
               <a :href="link.url" target="_blank" rel="noopener noreferrer"
                  class="link-tile group relative"
-                 :data-link-id="link.id || ''"
-                 :draggable="isCustomLink(link) ? true : null"
+                 :data-link-id="link.id || (link.name + '|' + link.url)"
+                  :draggable="debugMode || (!section.fixed && isCustomLink(link)) ? true : null"
                  :title="link.description ? link.name + ': ' + link.description : link.name">
+                <i x-show="section.fixed && !link.id" data-lucide="pin" class="absolute top-1 left-1 w-3 h-3 text-gray-400" title="Fixed link"></i>
                 <!-- Icon -->
                 <template x-if="iconStyle === 'dynamic' && link.icon && brandDynamicSvg[link.icon]">
                   <div x-html="brandDynamicSvg[link.icon]" class="icon-svg"></div>
@@ -113,11 +130,11 @@
                 <!-- Name -->
                 <span x-show="settings.showLinkNames !== false" class="text-xs font-medium text-center leading-tight" x-text="link.name"></span>
                 <!-- Actions overlay -->
-                <div x-show="isCustomLink(link)" class="absolute top-1 right-1 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button @click.prevent="openEditLinkModal(link, section.id)" class="btn-ghost p-0.5" title="Edit">
+                <div x-show="debugMode || isCustomLink(link)" class="absolute top-1 right-1 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button x-show="debugMode || isCustomLink(link)" @click.prevent="openEditLinkModal(link, section.id)" class="btn-ghost p-0.5" title="Edit">
                     <i data-lucide="pencil" class="w-3 h-3"></i>
                   </button>
-                  <button @click.prevent="deleteLink(link.id, section.id)" class="btn-ghost p-0.5" title="Delete">
+                  <button @click.prevent="deleteLink(link.id, section.id, link)" class="btn-ghost p-0.5" title="Delete">
                     <i data-lucide="trash-2" class="w-3 h-3"></i>
                   </button>
                 </div>
@@ -219,15 +236,15 @@
       </template>
     </template>
 
-    <!-- Debug modal -->
+    <!-- Debug settings modal -->
     <template x-teleport="body">
-      <template x-if="showDebug">
+      <template x-if="showDebugSettings">
         <div class="fixed inset-0 z-[100] flex items-center justify-center">
-          <div class="absolute inset-0 bg-black/50" @click="closeDebug"></div>
+          <div class="absolute inset-0 bg-black/50" @click="closeDebugSettings"></div>
           <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto p-6">
             <div class="flex items-center justify-between mb-4">
               <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">Debug Settings</h2>
-              <button @click="closeDebug" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+              <button @click="closeDebugSettings" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
                 <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
               </button>
             </div>
@@ -237,39 +254,28 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Greeting</label>
                 <input type="text" x-model="editDraft.greeting" class="input text-sm">
               </div>
-
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Logo URL</label>
                 <input type="text" x-model="editDraft.logo" class="input text-sm" placeholder="https://...">
               </div>
-
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Logo Alt</label>
                 <input type="text" x-model="editDraft.logoAlt" class="input text-sm">
               </div>
-
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Default Color</label>
                 <input type="color" x-model="editDraft.defaultColor" class="w-10 h-10 rounded cursor-pointer border-0">
               </div>
-
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date Format</label>
                 <input type="text" x-model="editDraft.dateFormat" class="input text-sm font-mono" placeholder="DD/MM/YYYY">
                 <p class="text-xs text-gray-400 mt-1">Tokens: DD MM YYYY</p>
               </div>
-
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Format</label>
                 <input type="text" x-model="editDraft.timeFormat" class="input text-sm font-mono" placeholder="HH:mm:ss">
                 <p class="text-xs text-gray-400 mt-1">Tokens: HH mm ss</p>
               </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Columns per row</label>
-                <input type="number" x-model="editDraft.gridColumns" min="1" max="6" class="input text-sm w-20">
-              </div>
-
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Links per row</label>
                 <input type="number" x-model="editDraft.linksPerRow" min="2" max="12" class="input text-sm w-20">
@@ -280,77 +286,48 @@
                 <div class="grid grid-cols-2 gap-4">
                   <div class="space-y-2">
                     <p class="text-xs font-medium text-gray-500 uppercase">Light</p>
-                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-                      Background <input type="color" x-model="editDraft.colors.light.bg" class="w-8 h-8 rounded cursor-pointer border-0">
-                    </label>
-                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-                      Surface <input type="color" x-model="editDraft.colors.light.surface" class="w-8 h-8 rounded cursor-pointer border-0">
-                    </label>
-                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-                      Text <input type="color" x-model="editDraft.colors.light.text" class="w-8 h-8 rounded cursor-pointer border-0">
-                    </label>
-                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-                      Accent <input type="color" x-model="editDraft.colors.light.accent" class="w-8 h-8 rounded cursor-pointer border-0">
-                    </label>
+                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">Background <input type="color" x-model="editDraft.colors.light.bg" class="w-8 h-8 rounded cursor-pointer border-0"></label>
+                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">Surface <input type="color" x-model="editDraft.colors.light.surface" class="w-8 h-8 rounded cursor-pointer border-0"></label>
+                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">Text <input type="color" x-model="editDraft.colors.light.text" class="w-8 h-8 rounded cursor-pointer border-0"></label>
+                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">Accent <input type="color" x-model="editDraft.colors.light.accent" class="w-8 h-8 rounded cursor-pointer border-0"></label>
                   </div>
                   <div class="space-y-2">
                     <p class="text-xs font-medium text-gray-500 uppercase">Dark</p>
-                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-                      Background <input type="color" x-model="editDraft.colors.dark.bg" class="w-8 h-8 rounded cursor-pointer border-0">
-                    </label>
-                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-                      Surface <input type="color" x-model="editDraft.colors.dark.surface" class="w-8 h-8 rounded cursor-pointer border-0">
-                    </label>
-                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-                      Text <input type="color" x-model="editDraft.colors.dark.text" class="w-8 h-8 rounded cursor-pointer border-0">
-                    </label>
-                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-                      Accent <input type="color" x-model="editDraft.colors.dark.accent" class="w-8 h-8 rounded cursor-pointer border-0">
-                    </label>
+                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">Background <input type="color" x-model="editDraft.colors.dark.bg" class="w-8 h-8 rounded cursor-pointer border-0"></label>
+                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">Surface <input type="color" x-model="editDraft.colors.dark.surface" class="w-8 h-8 rounded cursor-pointer border-0"></label>
+                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">Text <input type="color" x-model="editDraft.colors.dark.text" class="w-8 h-8 rounded cursor-pointer border-0"></label>
+                    <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">Accent <input type="color" x-model="editDraft.colors.dark.accent" class="w-8 h-8 rounded cursor-pointer border-0"></label>
                   </div>
+                </div>
+              </div>
+
+              <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">Background Image</h3>
+                <div class="space-y-2">
+                  <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">Light URL <input type="text" x-model="editDraft.backgroundImage.light" class="input text-sm w-3/4" placeholder="https://..."></label>
+                  <label class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">Dark URL <input type="text" x-model="editDraft.backgroundImage.dark" class="input text-sm w-3/4" placeholder="https://..."></label>
                 </div>
               </div>
 
               <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
                 <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">Features</h3>
                 <div class="space-y-3">
-                  <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" x-model="editDraft.features.darkMode" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                    <span class="text-sm text-gray-700 dark:text-gray-300">Dark Mode</span>
-                  </label>
-                  <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" x-model="editDraft.features.importExport" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                    <span class="text-sm text-gray-700 dark:text-gray-300">Import / Export</span>
-                  </label>
-                  <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" x-model="editDraft.showDate" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                    <span class="text-sm text-gray-700 dark:text-gray-300">Show Date</span>
-                  </label>
-                  <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" x-model="editDraft.showTime" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                    <span class="text-sm text-gray-700 dark:text-gray-300">Show Time</span>
-                  </label>
-                  <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" x-model="editDraft.showLinkNames" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                    <span class="text-sm text-gray-700 dark:text-gray-300">Show Link Names</span>
-                  </label>
-                  <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" x-model="editDraft.features.weather" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                    <span class="text-sm text-gray-700 dark:text-gray-300">Weather Widget</span>
-                  </label>
-                  <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" x-model="editDraft.features.iconStyleSwitch" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                    <span class="text-sm text-gray-700 dark:text-gray-300">Icon Style Switch</span>
-                  </label>
+                  <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" x-model="editDraft.features.darkMode" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"><span class="text-sm text-gray-700 dark:text-gray-300">Dark Mode</span></label>
+                  <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" x-model="editDraft.features.importExport" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"><span class="text-sm text-gray-700 dark:text-gray-300">Import / Export</span></label>
+                  <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" x-model="editDraft.showDate" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"><span class="text-sm text-gray-700 dark:text-gray-300">Show Date</span></label>
+                  <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" x-model="editDraft.showTime" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"><span class="text-sm text-gray-700 dark:text-gray-300">Show Time</span></label>
+                  <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" x-model="editDraft.showLinkNames" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"><span class="text-sm text-gray-700 dark:text-gray-300">Show Link Names</span></label>
+                  <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" x-model="editDraft.features.weather" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"><span class="text-sm text-gray-700 dark:text-gray-300">Weather Widget</span></label>
+                  <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" x-model="editDraft.features.iconStyleSwitch" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"><span class="text-sm text-gray-700 dark:text-gray-300">Icon Style Switch</span></label>
                 </div>
               </div>
             </div>
 
             <div class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <button @click="resetDebug" class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Reset defaults</button>
+              <button @click="resetDebugSettings" class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Reset defaults</button>
               <div class="flex items-center gap-2">
-                <button @click="closeDebug" class="btn-ghost px-4 py-2 text-sm">Cancel</button>
-                <button @click="saveDebug" class="btn-primary px-4 py-2 text-sm">Save</button>
+                <button @click="closeDebugSettings" class="btn-ghost px-4 py-2 text-sm">Cancel</button>
+                <button @click="saveDebugSettings" class="btn-primary px-4 py-2 text-sm">Save</button>
               </div>
             </div>
           </div>

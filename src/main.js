@@ -637,13 +637,21 @@ document.addEventListener("alpine:init", () => {
       this.saveToStorage()
     },
 
+    activeSectionData() {
+      return this.sections.find((s) => s.id === this.activeTab)
+    },
+
     detectIconFromUrl() {
       try {
         const host = new URL(this.linkModalUrl).hostname.replace("www.", "")
-        const guess = host.split(".")[0].toLowerCase()
-        if (this.popularIcons.some((i) => i.slug === guess)) {
-          this.linkModalIcon = guess
-          this.iconSearch = guess
+        const segments = host.split(".")
+        for (const segment of segments) {
+          const guess = segment.toLowerCase()
+          if (this.popularIcons.some((i) => i.slug === guess)) {
+            this.linkModalIcon = guess
+            this.iconSearch = guess
+            break
+          }
         }
       } catch { /* ignore */ }
     },

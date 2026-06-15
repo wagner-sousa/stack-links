@@ -25,6 +25,7 @@ export const popularIcons = [
   { slug: "googlemaps", name: "Google Maps" },
   { slug: "googlescholar", name: "Google Scholar" },
   { slug: "slack", name: "Slack" },
+  { slug: "clickup", name: "ClickUp" },
   { slug: "discord", name: "Discord" },
   { slug: "telegram", name: "Telegram" },
   { slug: "signal", name: "Signal" },

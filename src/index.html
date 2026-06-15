@@ -86,11 +86,11 @@
           <div class="flex items-center justify-between mb-4">
             <p x-show="section.description" class="text-sm text-gray-400" x-text="section.description"></p>
             <div class="flex items-center gap-1 ml-auto">
-              <button x-show="debugMode" @click="moveSectionUp(section.id)" class="btn-ghost p-1" title="Move section up">
-                <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
+              <button x-show="debugMode" @click="moveSectionUp(section.id)" class="btn-ghost p-1" title="Move section left">
+                <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
               </button>
-              <button x-show="debugMode" @click="moveSectionDown(section.id)" class="btn-ghost p-1" title="Move section down">
-                <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+              <button x-show="debugMode" @click="moveSectionDown(section.id)" class="btn-ghost p-1" title="Move section right">
+                <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
               </button>
               <button x-show="debugMode || !section.fixed" @click="openEditSectionModal(section)" class="btn-ghost p-1" title="Edit section">
                 <i data-lucide="pencil" class="w-3.5 h-3.5"></i>

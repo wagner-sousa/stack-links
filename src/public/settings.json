@@ -15,6 +15,10 @@
   "linksPerRow": 6,
   "showLinkNames": true,
   "defaultColor": "#4f46e5",
+  "backgroundImage": {
+    "light": "",
+    "dark": ""
+  },
   "gridColumns": 3,
   "colors": {
     "light": {

@@ -54,7 +54,7 @@ document.addEventListener("alpine:init", () => {
     // Debug mode
     debugMode: true,
     showDebugSettings: false,
-    editDraft: {},
+    editDraft: { colors: { light: { bg: "", surface: "", text: "", accent: "" }, dark: { bg: "", surface: "", text: "", accent: "" } }, features: {}, greeting: "", logo: "", logoAlt: "", dateFormat: "DD/MM/YYYY", timeFormat: "HH:mm:ss", showDate: true, showTime: true, showLinkNames: true, linksPerRow: 6, gridColumns: 3, defaultColor: "#4f46e5" },
     originalDefaults: {},
 
     async init() {

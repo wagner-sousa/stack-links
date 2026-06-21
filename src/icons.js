@@ -3443,8 +3443,6 @@ export const popularIcons = [
   { slug: "zyte", name: "Zyte" },
 ]
 
-]
-
 export function brandIconUrl(slug, sectionColor, iconStyle) {
   if (!slug) return null
   const base = `https://cdn.simpleicons.org/${slug}`

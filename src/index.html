@@ -157,93 +157,85 @@
     </main>
 
     <!-- Section modal -->
-    <template x-teleport="body">
-      <template x-if="sectionModalOpen">
-        <div class="fixed inset-0 z-[100] flex items-center justify-center">
-          <div class="absolute inset-0 bg-black/50" @click="closeSectionModal"></div>
-          <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-md mx-4 p-6">
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100" x-text="sectionModalMode === 'add' ? 'Add Section' : 'Edit Section'"></h2>
-              <button @click="closeSectionModal" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
-              </button>
-            </div>
-            <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
-                <input type="text" x-model="sectionModalName" class="input text-sm" @keydown.enter="saveSectionModal" placeholder="Section name">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description (optional)</label>
-                <input type="text" x-model="sectionModalDescription" class="input text-sm" @keydown.enter="saveSectionModal" placeholder="Section description">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
-                <input type="color" x-model="sectionModalColor" class="w-10 h-10 rounded cursor-pointer border-0">
-              </div>
-            </div>
-            <div class="flex items-center justify-end gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <button @click="closeSectionModal" class="btn-ghost px-4 py-2 text-sm">Cancel</button>
-              <button @click="saveSectionModal" class="btn-primary px-4 py-2 text-sm" x-text="sectionModalMode === 'add' ? 'Add' : 'Save'"></button>
-            </div>
+    <div x-show="sectionModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" x-cloak>
+      <div class="absolute inset-0 bg-black/50" @click="closeSectionModal"></div>
+      <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-md mx-4 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100" x-text="sectionModalMode === 'add' ? 'Add Section' : 'Edit Section'"></h2>
+          <button @click="closeSectionModal" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+            <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
+          </button>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+            <input type="text" x-model="sectionModalName" class="input text-sm" @keydown.enter="saveSectionModal" placeholder="Section name">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description (optional)</label>
+            <input type="text" x-model="sectionModalDescription" class="input text-sm" @keydown.enter="saveSectionModal" placeholder="Section description">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
+            <input type="color" x-model="sectionModalColor" class="w-10 h-10 rounded cursor-pointer border-0">
           </div>
         </div>
-      </template>
-    </template>
+        <div class="flex items-center justify-end gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <button @click="closeSectionModal" class="btn-ghost px-4 py-2 text-sm">Cancel</button>
+          <button @click="saveSectionModal" class="btn-primary px-4 py-2 text-sm" x-text="sectionModalMode === 'add' ? 'Add' : 'Save'"></button>
+        </div>
+      </div>
+    </div>
 
     <!-- Link modal -->
-    <template x-teleport="body">
-      <template x-if="linkModalOpen">
-        <div class="fixed inset-0 z-[100] flex items-center justify-center">
-          <div class="absolute inset-0 bg-black/50" @click="closeLinkModal"></div>
-          <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto p-6">
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100" x-text="linkModalMode === 'add' ? 'Add Link' : 'Edit Link'"></h2>
-              <button @click="closeLinkModal" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
-              </button>
+    <div x-show="linkModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" x-cloak>
+      <div class="absolute inset-0 bg-black/50" @click="closeLinkModal"></div>
+      <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100" x-text="linkModalMode === 'add' ? 'Add Link' : 'Edit Link'"></h2>
+          <button @click="closeLinkModal" class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+            <i data-lucide="x" class="w-5 h-5 text-gray-500"></i>
+          </button>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+            <input type="text" x-model="linkModalName" class="input text-sm" @keydown.enter="saveLinkModal" placeholder="Link name">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL</label>
+            <input type="text" x-model="linkModalUrl" class="input text-sm" @keydown.enter="saveLinkModal" @input.debounce="detectIconFromUrl" placeholder="https://...">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Icon</label>
+            <div class="relative">
+              <input type="text" x-model="iconSearch" class="input text-sm pl-9" @input="linkModalIcon = iconSearch.trim()" placeholder="Search icons...">
+              <template x-if="linkModalIcon">
+                <img :src="'https://cdn.simpleicons.org/' + linkModalIcon" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-5 h-5" alt="">
+              </template>
             </div>
-            <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
-                <input type="text" x-model="linkModalName" class="input text-sm" @keydown.enter="saveLinkModal" placeholder="Link name">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL</label>
-                <input type="text" x-model="linkModalUrl" class="input text-sm" @keydown.enter="saveLinkModal" @input.debounce="detectIconFromUrl" placeholder="https://...">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Icon</label>
-                <div class="relative">
-                  <input type="text" x-model="iconSearch" class="input text-sm pl-9" @input="linkModalIcon = iconSearch.trim()" placeholder="Search icons...">
-                  <template x-if="linkModalIcon">
-                    <img :src="'https://cdn.simpleicons.org/' + linkModalIcon" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-5 h-5" alt="">
-                  </template>
-                </div>
-                <div class="mt-2 max-h-40 overflow-y-auto flex flex-wrap gap-1.5 p-2 rounded-lg border border-gray-200 dark:border-gray-700">
-                  <template x-for="icon in filteredPopularIcons()" :key="icon.slug">
-                    <button @click="selectIcon(icon.slug)"
-                            class="w-8 h-8 rounded-lg flex items-center justify-center p-1 border transition-all duration-100"
-                            :class="linkModalIcon === icon.slug ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 ring-2 ring-indigo-400' : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'"
-                            :title="icon.name">
-                      <img :src="'https://cdn.simpleicons.org/' + icon.slug" class="w-5 h-5" alt="" loading="lazy">
-                    </button>
-                  </template>
-                </div>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description (optional)</label>
-                <input type="text" x-model="linkModalDescription" class="input text-sm" @keydown.enter="saveLinkModal" placeholder="Short description">
-              </div>
-            </div>
-            <div class="flex items-center justify-end gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <button @click="closeLinkModal" class="btn-ghost px-4 py-2 text-sm">Cancel</button>
-              <button @click="saveLinkModal" class="btn-primary px-4 py-2 text-sm" x-text="linkModalMode === 'add' ? 'Add' : 'Save'"></button>
+            <div class="mt-2 max-h-40 overflow-y-auto flex flex-wrap gap-1.5 p-2 rounded-lg border border-gray-200 dark:border-gray-700">
+              <template x-for="icon in filteredPopularIcons()" :key="icon.slug">
+                <button @click="selectIcon(icon.slug)"
+                        class="w-8 h-8 rounded-lg flex items-center justify-center p-1 border transition-all duration-100"
+                        :class="linkModalIcon === icon.slug ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 ring-2 ring-indigo-400' : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'"
+                        :title="icon.name">
+                  <img :src="'https://cdn.simpleicons.org/' + icon.slug" class="w-5 h-5" alt="" loading="lazy">
+                </button>
+              </template>
             </div>
           </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description (optional)</label>
+            <input type="text" x-model="linkModalDescription" class="input text-sm" @keydown.enter="saveLinkModal" placeholder="Short description">
+          </div>
         </div>
-      </template>
-    </template>
+        <div class="flex items-center justify-end gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <button @click="closeLinkModal" class="btn-ghost px-4 py-2 text-sm">Cancel</button>
+          <button @click="saveLinkModal" class="btn-primary px-4 py-2 text-sm" x-text="linkModalMode === 'add' ? 'Add' : 'Save'"></button>
+        </div>
+      </div>
+    </div>
 
     <!-- Debug settings modal -->
     <template x-teleport="body">

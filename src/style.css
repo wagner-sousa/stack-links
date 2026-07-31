@@ -18,7 +18,14 @@
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
-  transition: background-color 0.2s, color 0.2s;
+  transition: background-color 0.2s, color 0.2s, background-image 0.2s;
+}
+body.has-bg-img {
+  background-image: linear-gradient(var(--bg-overlay), var(--bg-overlay)), var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 .section-card {

@@ -101,6 +101,12 @@ document.addEventListener("alpine:init", () => {
                 dark: { ...defaultSettings.colors?.dark, ...parsed.settings.colors?.dark },
               }
             }
+            if (parsed.settings.backgroundImage) {
+              defaultSettings.backgroundImage = {
+                light: parsed.settings.backgroundImage.light ?? defaultSettings.backgroundImage?.light ?? "",
+                dark: parsed.settings.backgroundImage.dark ?? defaultSettings.backgroundImage?.dark ?? "",
+              }
+            }
           }
           if (parsed.activeTab) this.activeTab = parsed.activeTab
         } catch {
@@ -295,12 +301,21 @@ document.addEventListener("alpine:init", () => {
       const isDark = this.theme === "dark"
       document.documentElement.classList.toggle("dark", isDark)
       const colors = this.settings.colors?.[isDark ? "dark" : "light"]
+      const root = document.documentElement
       if (colors) {
-        const root = document.documentElement
         root.style.setProperty("--color-bg", colors.bg)
         root.style.setProperty("--color-surface", colors.surface)
         root.style.setProperty("--color-text", colors.text)
         root.style.setProperty("--color-accent", colors.accent)
+      }
+      const bgImg = this.settings.backgroundImage?.[isDark ? "dark" : "light"]
+      if (bgImg) {
+        root.style.setProperty("--bg-image", `url("${bgImg}")`)
+        root.style.setProperty("--bg-overlay", isDark ? "rgba(0,0,0,0.7)" : "rgba(255,255,255,0.85)")
+        document.body.classList.add("has-bg-img")
+      } else {
+        root.style.setProperty("--bg-image", "none")
+        document.body.classList.remove("has-bg-img")
       }
     },
 
